@@ -209,3 +209,30 @@ lerna add axios utils/get-npm-info/
 
 //安装拼接url的库,拼接url的时候不用打斜杠
 lerna add url-join utils/get-npm-info/
+
+
+
+
+发布
+发布之前要把修改的东西提交到github，也可以提交到gitee
+
+发布之前都要对版本号进行升级
+lerna version
+主要选择patch ，minor ，Major 其中一个
+然后弹出选项是否创建1.0.1版本，
+首次选no,之后选yes
+
+发布
+使用了 orgnizition 上传的时候默认包都时private的，必须将包公开
+在packages文件夹里的所有包的 package.json 里面写上
+"publishConfig": {
+  "access": "public"
+}
+
+npm publish 
+主要选择patch ，minor ，Major 其中一个
+然后弹出选项是否创建1.0.1版本，
+首次选no,之后选yes
+
+
+遇到版本号错误就手动升级每个package.json 文件的版本号
