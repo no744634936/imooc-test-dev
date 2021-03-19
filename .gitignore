@@ -12,3 +12,4 @@ utils/**/package-lock.json
 models/**/package-lock.json
 commands/**/package-lock.json
 lerna-debug.log
+package-lock.json
