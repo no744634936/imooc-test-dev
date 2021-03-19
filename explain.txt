@@ -138,7 +138,7 @@ core/cli/lib/indes.js
 
 
 
-// 检查项目版本号，检查node版本，检查root启动，检查用户主目录,检查输入的参数，检查环境变量
+// 检查项目版本号，检查node版本，检查root权限自动降级，检查用户主目录,检查输入的参数，检查环境变量
 修改core/cli/bin/index.js 文件
 修改core/cli/lib/index.js 文件
 修改utils/log/lib/index.js 文件
@@ -170,7 +170,42 @@ lerna add semver core/cli/
 lerna add colors core/cli/
 
 
+
+// 检查root权限自动降级
 // 在linux系统里用sudo imooc-cli-dev用root账户创建的文件就属于root账户的，其他人就无法修改了
-//检查是否是root权限登录，如果是的话就自动权限降级
+// 检查是否是root权限登录，如果是的话就自动权限降级
 // windows 上面用不了这个方法
 lerna add root-check core/cli/
+
+
+
+//user-hom检查用户主目录,path-exists判断文件是否存在
+//没有用户主目录缓存之类的好多事都做不了
+lerna add user-home core/cli/
+lerna add path-exists core/cli/
+
+
+//检查环境变量,环境变量是很重要的
+//再用户主目录下创建一个环境变量.env 文件 里面写上
+------
+CLI_HOME=.imooc-cli
+DB_USER=root
+DB_PWD=123456
+-----
+lerna add dotenv core/cli/
+
+
+
+//脚手架更新提醒
+//把脚手架下载到本地之后有可能最新的版本已经更新了，而本地可能还并不知晓，所以要提示用户更新
+lerna create get-npm-info utils
+
+
+core/cli/package.json 文件里面写上
+"@imooc-cli-dev-zhang/get-npm-info": "file:../../utils/get-npm-info",
+
+//安装呼叫api的库
+lerna add axios utils/get-npm-info/
+
+//安装拼接url的库,拼接url的时候不用打斜杠
+lerna add url-join utils/get-npm-info/

@@ -1,0 +1,23 @@
+{
+  "name": "@imooc-cli-dev-zhang/get-npm-info",
+  "version": "1.0.0",
+  "description": "> TODO: description",
+  "author": "no744634 <zhanghaifeng1123@gmail.com>",
+  "homepage": "",
+  "license": "ISC",
+  "main": "lib/get-npm-info.js",
+  "directories": {
+    "lib": "lib",
+    "test": "__tests__"
+  },
+  "files": [
+    "lib"
+  ],
+  "scripts": {
+    "test": "echo \"Error: run tests from root\" && exit 1"
+  },
+  "dependencies": {
+    "axios": "^0.21.1",
+    "url-join": "^4.0.1"
+  }
+}
