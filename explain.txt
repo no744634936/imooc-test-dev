@@ -1,0 +1,176 @@
+npm i -g lerna //先在自己的电脑上添加个lerna
+npm i -D lerna
+lerna init
+
+
+写.gitignore 文件
+----
+node_modules
+.vscode
+.idea
+packages/**/node_modules
+core/**/node_modules
+utils/**/node_modules
+models/**/node_modules
+commands/**/node_modules
+
+core/**/package-lock.json
+utils/**/package-lock.json
+models/**/package-lock.json
+commands/**/package-lock.json
+lerna-debug.log
+package-lock.json
+----
+
+
+写lerna.json 文件
+----
+"packages": [
+    "",
+    "core/*",
+    "commands/*",
+    "utils/*",
+    "models/*"
+],
+----
+
+
+拆包
+
+建立，core，models，utils ，command 四个文件夹
+
+
+创建npm的项目
+
+lerna create cli core
+
+-----
+package name 写上 @imooc-cli-dev-zhang/cli
+version 写上1.0.0
+description 写上 imooc-cli-dev-zhang cli
+-----
+core文件夹里面就会有一个 自动生成 cli/lib/cli.js 文件
+
+
+
+lerna create utils utils
+-----
+package name 写上 @imooc-cli-dev-zhang/utils
+version 写上1.0.0
+description 写上 imooc-cli-dev-zhang utils
+-----
+utils文件夹里面就会有一个 自动生成 utils/lib/utils.js 文件
+
+
+
+
+@imooc-cli-dev-zhang 就是npm 管理画面里的组织名,这个group必须要建立，不容易名字产生冲突
+去npm 管理画面
+点击 add orgnizition
+输入imooc-cli-dev
+点击create
+
+
+
+修改core/cli/package.json文件里的dependencies
+-------------
+"dependencies": {
+"@imooc-cli-dev-zhang/utils": "file:../../utils/utils"
+},
+
+如果你在dependencies配置的版本信息是"file:xx" 使用npm install 后node_modules中添加的还是本地的包，
+如果dependencies中配置的是具体的版本号, npm intall 会去找线上发布的包。
+
+
+然后再 core/cli文件夹下建立一个bin/index.js 文件
+里面写上:
+#!/usr/bin/env node
+console.log("test")
+
+然后在 core/cli/package.json文件里面写上
+"bin": {
+    "imooc-test-dev": "bin/index.js"
+}
+
+cd 到core/cli文件夹下 npm link
+
+这个命令回给当前的包下载依赖，还会在
+C:\Users\zhang\AppData\Roaming\npm 文件夹里生成 imooc-test-dev.cmd 文件
+
+C:\Users\zhang\AppData\Roaming\npm\imooc-test-dev -> C:\Users\zhang\AppData\Roaming\npm\node_modules\@imooc-cli-dev-zhang\cli\bin\index.js
+C:\Users\zhang\AppData\Roaming\npm\node_modules\@imooc-cli-dev-zhang\cli -> C:\Users\zhang\Desktop\imooc-test\core\cli
+
+当在任意文件夹下运行 imooc-test-dev 命令时
+操作系统会去去环境变量中找是否有 imooc-test-dev.cmd 命令
+环境变量里有 C:\Users\zhang\AppData\Roaming\npm 这个路径
+在这个路径下找到了  imooc-test-dev 这个文件指向的是imooc-test-dev.cmd
+
+imooc-test-dev.cmd 指向的是
+C:\Users\zhang\AppData\Roaming\npm\node_modules\@imooc-cli-dev-zhang\cli\bin\index.js
+这个文件
+因为index.js 文件里有这样一行代码
+#!/usr/bin/env node
+告诉系统去环境变量中找node 命令来执行这个index.js 文件
+
+环境变量中的C:\Users\zhang\AppData\Roaming\npm 是在下载node.js的时候就已经安装好了的
+如何查看环境变量 echo $PATH
+如果查看vue命令指向那个文件 which vue
+
+-------------------
+如果写的是
+"dependencies": {
+"@imooc-cli-dev-zhang/utils": "^1.0.0"
+},
+那么可以直接使用 lerna link 来做软连接
+-------------
+
+
+
+做完上面哪些步骤就可以在任意文件夹下的terminal里面运行了
+
+core/cli文件夹下
+npm i -S import-local
+npm i -S npmlog
+
+修改这两个文件
+core/cli/bin/indes.js
+core/cli/lib/indes.js
+
+
+
+// 检查项目版本号，检查node版本，检查root启动，检查用户主目录,检查输入的参数，检查环境变量
+修改core/cli/bin/index.js 文件
+修改core/cli/lib/index.js 文件
+修改utils/log/lib/index.js 文件
+修改utils/get-npm-info/lib/index.js 文件
+
+
+//检查版本号的功能
+// 在utils 里面建立log包
+lerna create  @imooc-cli-dev-zhang/log utils/
+
+使用 lerna add npmlog utils/log/ 命令在log文件夹里面安装npmlog 依赖
+使用lerna 的好处就是不用特意到utils/log/包之下去输入 npm install log -s
+在任何目录下 lerna add npmlog utils/log/ 就可以将npmlog 安装到 utils/log/ 
+
+//在core/cli里面使用log包
+
+core/cli/package.json里面写入
+-----
+"@imooc-cli-dev-zhang/log": "file:../../utils/log",
+------
+cd 到\imooc-test\core\cli 目录 然后执行 npm link(npm unlink 之后再次npm link)
+
+
+
+//检查node时否为最新版本
+//用来比对版本号的包
+lerna add semver core/cli/
+//给输出的文字添加颜色
+lerna add colors core/cli/
+
+
+// 在linux系统里用sudo imooc-cli-dev用root账户创建的文件就属于root账户的，其他人就无法修改了
+//检查是否是root权限登录，如果是的话就自动权限降级
+// windows 上面用不了这个方法
+lerna add root-check core/cli/

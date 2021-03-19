@@ -1,0 +1,25 @@
+{
+  "name": "@imooc-cli-dev-zhang/log",
+  "version": "1.0.0",
+  "description": " @imooc-cli-dev-zhang log",
+  "author": "zhanghaifeng2019 <zhang@rentracks.co.jp>",
+  "homepage": "",
+  "license": "ISC",
+  "main": "lib/log.js",
+  "directories": {
+    "lib": "lib",
+    "test": "__tests__"
+  },
+  "files": [
+    "lib"
+  ],
+  "publishConfig": {
+    "access": "public"
+  },
+  "scripts": {
+    "test": "echo \"Error: run tests from root\" && exit 1"
+  },
+  "dependencies": {
+    "npmlog": "^4.1.2"
+  }
+}

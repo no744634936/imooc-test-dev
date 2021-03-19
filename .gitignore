@@ -1,0 +1,15 @@
+node_modules
+.vscode
+.idea
+packages/**/node_modules
+core/**/node_modules
+utils/**/node_modules
+models/**/node_modules
+commands/**/node_modules
+
+core/**/package-lock.json
+utils/**/package-lock.json
+models/**/package-lock.json
+commands/**/package-lock.json
+lerna-debug.log
+package-lock.json

@@ -1,0 +1,19 @@
+{
+  "name": "@imooc-cli-dev-zhang/utils",
+  "version": "1.0.0",
+  "description": "imooc-cli-dev-zhang utils",
+  "author": "zhanghaifeng2019 <zhang@rentracks.co.jp>",
+  "homepage": "",
+  "license": "ISC",
+  "main": "lib/utils.js",
+  "directories": {
+    "lib": "lib",
+    "test": "__tests__"
+  },
+  "files": [
+    "lib"
+  ],
+  "scripts": {
+    "test": "echo \"Error: run tests from root\" && exit 1"
+  }
+}
