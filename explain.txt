@@ -212,6 +212,111 @@ lerna add url-join utils/get-npm-info/
 
 
 
+//命令注册
+lerna add commander core/cli/
+
+
+//实现init包的动态加载
+lerna create @imooc-cli-dev-zhang/exec core/
+lerna create @imooc-cli-dev-zhang/package models/
+
+
+
+core/cli/package.json 文件里面写上
+"@imooc-cli-dev-zhang/init": "file:../../commands/init",
+"@imooc-cli-dev-zhang/exec": "file:../exec",
+然后在core/cli文件夹下  npm install
+
+
+models/package/package.json 文件里面写上
+  "dependencies": {
+    "@imooc-cli-dev-zhang/utils": "file:../../utils/utils"
+  }
+然后在models/package文件夹下  npm install
+
+
+core/exec/package.json 文件里面写上
+"dependencies": {
+    "@imooc-cli-dev-zhang/package": "file:../../models/package",
+    "@imooc-cli-dev-zhang/log": "file:../../utils/log"
+}
+然后在models/package文件夹下 npm install
+
+
+lerna add pkg-dir models/package  ( 或者cd 到models/package目录下 npm install -S pkg-dir)
+lerna add npminstall models/package 
+lerna add path-exists models/package 
+lerna add fs-extra models/package 
+修改models/package.js 文件
+
+lerna create format-path utils
+将format-path包导入 models/package
+
+
+
+// 测试命令
+// imooc-test-dev  init test_projcet_name  --debug
+// imooc-test-dev  init projcet_name -tp /mnt/c/Users/zhang/Desktop/imooc-test/commands/init --debug --force
+// 执行 exec 
+
+// 如果指定了target_path，就使用这个target_path下的本地的init包 (也就是/mnt/c/Users/zhang/Desktop/imooc-test/commands/init这个包)
+
+// 如果没有指定target_path 第一次运行 imooc-test-dev  init test_projcet_name  --debug 命令
+
+// 走的是install 将 @imooc-cli/init 这个package 下载并放入 home/zhang/.imooc-cli-dev/dependencies/node_modules，默认下载的是最新版本
+
+// 假如第一次下载的是1.0.0版本   _@imooc-cli_init@1.1.0@@imooc-cli'
+
+// 第二次运行 imooc-test-dev  init test_projcet_name  --debug 命令
+
+// 去这个 home/zhang/.imooc-cli-dev/dependencies/node_modules 缓存路径下 查看最新版本的_@imooc-cli_init@1.1.2@@imooc-cli/init 这个包是否存在。
+
+// 如果不存在就下载_@imooc-cli_init@1.1.2@@imooc-cli/init 到 home/zhang/.imooc-cli-dev/dependencies/node_modules 里面
+
+//  dependencies/node_modules 里面就会有两个包
+
+//   '_@imooc-cli_init@1.1.0@@imooc-cli'
+//  '_@imooc-cli_init@1.1.2@@imooc-cli'
+
+//  mnt/c/Users/zhang/Desktop/imooc-test/commands/init/lib/init.js 文件 
+//或者执行 @imooc-cli_init@1.1.2@@imooc-cli/init/lib/init.js  文件
+
+
+
+------------------------------------------------
+cd 到 /home/zhang/文件夹下
+rm -rf .imooc-cli-dev 删除 .imooc-cli-dev 文件夹 
+
+1,imooc-test-dev  init test_projcet_name  --debug
+
+  target_path不存在的时候并且指定的package(init package)在home/zhang/.imooc-cli-dev/dependencies/node_modules 这个目录也没有的时候
+  第一次走的是install 将 @imooc-cli/init 这个package 下载并放入 home/zhang/.imooc-cli-dev/dependencies/node_modules，默认下载的是最新版本
+
+2，rm -rf dependencies  (rm -rf .imooc-cli-dev 也可以)
+   将  const package_version='latest'; 改为  const package_version='1.1.0';
+
+3，imooc-test-dev  init test_projcet_name  --debug
+   他就会安装1.1.0这个版本 从原来的 '_@imooc-cli_init@1.1.2@@imooc-cli'  变为 '_@imooc-cli_init@1.1.0@@imooc-cli'
+
+4,再执行一次 imooc-test-dev  init test_projcet_name  --debug 
+   他就会安装1.1.2这个版本
+   dependencies/node_modules 里面就会有两个包
+   '_@imooc-cli_init@1.1.0@@imooc-cli'
+   '_@imooc-cli_init@1.1.2@@imooc-cli'
+
+5, 将 const package_version='1.1.0'  改为 const package_version='latest'
+
+// 判断target path 是否存在，如果存在就根据target path获取本地代码进行开发，如果不存在就创建缓存目录，下载package并把这个package缓存到本地。
+// 在本地开发的时候，希望 init 指向的是/mnt/c/Users/zhang/Desktop/imooc-test/commands/init 这个包。
+--------------------------------------
+
+
+
+
+
+
+
+
 
 发布
 发布之前要把修改的东西提交到github，也可以提交到gitee
@@ -236,3 +341,6 @@ npm publish
 
 
 遇到版本号错误就手动升级每个package.json 文件的版本号
+
+
+写代码的时候一定要用if 判断那个值存不存在，

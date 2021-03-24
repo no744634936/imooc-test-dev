@@ -16,11 +16,8 @@ const root_check=require("root-check")
 //判断用户主目录
 const user_home=require("user-home")
 const path_exists=require("path-exists").sync;
-// //检查输入参数的包，在checkInputArgs方法里使用
-// // const minimist=require("minimist")
-// const commander=require('commander')
-// const init =require('@imooc-cli-dev-zhang/init')
-// const exec =require('@imooc-cli-dev-zhang/exec')
+const commander=require('commander')
+const exec =require('@imooc-cli-dev-zhang/exec')
 
 module.exports = cli;
 
@@ -29,6 +26,11 @@ async function cli() {
         await prepare()
     }catch(e){
         loger.error(e.message)
+        if(process.env.LOG_LEVEL==="verbose"){
+            //在debug模式下打印全部错误信息
+            //if(program.debug)也可以
+            console.log(e)
+        }
     }
 
 }
@@ -40,7 +42,8 @@ async function prepare(){
     check_root();
     check_user_home();
     check_env();
-    await check_global_update();
+    // await check_global_update();
+    registerCommand();
 }
 
 //检查cli项目版本号
@@ -61,7 +64,7 @@ function checke_node_version(){
 }
 
 
-// 在linux系统里用sudo imooc-cli-dev
+// 在linux系统里用sudo imooc-test-dev
 // 在linux系统用root账户创建的文件就属于root账户的，其他人就无法修改了
 ////检查是否是用root权限登录，如果是的话就自动权限降级,这样用root账户建的文件别人也能修改
 // windows 上面用不了这个方法
@@ -80,7 +83,7 @@ function check_user_home(){
 }
 
 //环境变量的检查与修改
-//运行imooc-cli-dev --debug命令的时候才会出动check_env方法 
+//运行imooc-test-dev --debug命令的时候才会出动check_env方法 
 function check_env(){
     //dotenv 包可以从.env文件加载环境变量，到process.env里去
     const dotenv= require("dotenv")
@@ -114,7 +117,7 @@ function create_defalut_config(){
     }
 
     //做一个process.env.CLI_HOME_PATH 环境变量
-    //这个有什么用呢？
+    //这个有什么用呢？ 做个缓存目录
     process.env.CLI_HOME_PATH=cli_config.cli_home
     // console.log(process.env);
 }
@@ -123,7 +126,7 @@ function create_defalut_config(){
 async function check_global_update(){
     // 1,获取当前版本号与模块名(npm 包名)
     const current_version=pkg.version;
-    const npm_name=pkg.name       //@imooc-cli-dev-zhang/core
+    const npm_name=pkg.name       //@imooc-test-dev-zhang/core
     // 2，调用npm api 获取版本号
     const {get_bigest_versions}=require("@imooc-cli-dev-zhang/get-npm-info");
 
@@ -134,4 +137,85 @@ async function check_global_update(){
         loger.info('版本检查',colors.green(`当前版本为最新版本${current_version}`))
     }
     // console.log(bigest_version);
+}
+
+
+
+//注册命令
+const program=new commander.Command()
+
+function registerCommand(){
+    //设置一些全局的参数,初始化
+    //所有命令都可以用这几个option
+    program
+        .name(Object.keys(pkg.bin)[0])
+        .usage('<command> [options]')
+        .version(pkg.version)
+        .option('-d,--debug','是否开启调试模式',false)
+        .option('-tp,--targetPath <targetPath>','是否指定本地调试文件路径','')
+        .exitOverride()   //如果像手动处理错误使用这个选项，
+
+    //注册命令
+    //  imooc-test-dev  init projcet_name -tp /mnt/c/Users/zhang/Desktop/imooc-test/commands/init --debug --force
+    // 注意exec方法会接收到一些参数，可以用arguments 获得
+    program
+        .command('init [projcetName]')
+        .option('-f,--force','是否强制初始化项目')
+        .action(exec)
+
+
+    //  imooc-test-dev  init projcet_name -f -tp /xx/YY  
+    // 这个命令中-f 是init 命令中的opiton，可以通过cmdObj 获取
+    // -tp是全局option 得通过  options.parent._optionValues.targetPath 获取
+    // console.log('init',projectName,cmdObj,options.parent._optionValues.targetPath);
+    // 但是嵌套得子命令下那不到parent._optionValues，所以要将监听命令获取targetPath 并放入环境变量中
+    program
+        .on('option:targetPath',()=>{
+            // console.log(program.opts().targetPath);
+            process.env.CLI_TARGET_PATH=program.opts().targetPath;
+        })
+
+    //監聽事件，实现debug模式
+     //imooc-test-dev --debug  这种写法是错误得 要这样写imooc-test-dev init --debug
+     // imooc-test-dev -d      这种写法是错误得 要这样写imooc-test-dev init --d
+     //注意用到了this 不能用箭頭函數
+     program
+        .on('option:debug',()=>{
+            if(program.opts().debug){
+                process.env.LOG_LEVEL='verbose';
+            }else{
+                process.env.LOG_LEVEL='info';
+            }
+            loger.level=process.env.LOG_LEVEL
+            loger.verbose('test')
+        })
+
+    //对未知的命令进行处理
+    //imooc-cli-dev yooo
+    program.on('command:*',(obj)=>{
+        // console.log(obj);
+        console.log(colors.red('未知的命令:'+obj[0]))
+        const availableCommands=program.commands.map(cmd=>cmd.name())
+        console.log(colors.red('可用命令:'+availableCommands.join(',')));
+    })
+
+    //只輸入 imooc-test-dev的時候，打印帮助文档
+    if(process.argv.length<3){
+        program.outputHelp();
+        console.log();
+    }else{
+        //这个东西必须在最下方,解析参数
+        try {
+            // 解析命令
+            program.parse(process.argv);
+          } catch (err) {
+            // 当命令输入不符合规范的时候，
+            loger.error(err.message);
+            // 遇到错误的时候打印帮助文档
+            if (err.code === 'commander.unknownOption') {
+              console.log();
+              program.outputHelp();
+            }
+        }
+    }
 }

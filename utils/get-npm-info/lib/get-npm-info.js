@@ -38,6 +38,21 @@ async function get_npm_package_versions(npm_name,api_url){
     }
 }
 
+//拿到package的最新版
+async function get_package_latest_version(package_name,api_url){
+    let versions=await get_npm_package_versions(package_name,api_url)
+    if(versions){
+        versions.sort((a,b)=>{
+            //做个倒叙排列
+            if(semver.gt(a,b)){
+                return -1
+            }
+        })
+        return versions[0]
+    }
+    return null;
+}
+
 //现在的版本号跟npm上面的包的版本号作对比，看是否有版本更新
 function get_semver_versions(base_version,all_versions){
     let bigger_versions=all_versions.filter(version=>{
@@ -70,5 +85,7 @@ async function get_bigest_versions(npm_name,base_version,api_url){
 module.exports = {
     get_npm_package_info,
     get_npm_package_versions,
-    get_bigest_versions
+    get_bigest_versions,
+    get_default_api_url,
+    get_package_latest_version
 };
