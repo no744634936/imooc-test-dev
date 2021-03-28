@@ -22,6 +22,12 @@ const exec =require('@imooc-cli-dev-zhang/exec')
 module.exports = cli;
 
 async function cli() {
+
+    // 这是一个全局的try catch，所有同步代码报的错都可以在这里被捕获，
+    // 但是与promise有关的方法报的错需要在引用的时候单独捕获。在这里无法捕获
+    // 例如 exec方法下面的 require(root_file)(Array.from(arguments)); 就使用的是promise，command.js 文件里有promise
+    // 通过异步执行的命令都需要单独捕获。
+    // 否则会报 UnhandledPromiseRejectionWarning: 错误
     try{
         await prepare()
     }catch(e){
@@ -38,7 +44,6 @@ async function cli() {
 //脚手架启动阶段的方法
 async function prepare(){
     check_page_version();
-    checke_node_version();
     check_root();
     check_user_home();
     check_env();
@@ -49,18 +54,6 @@ async function prepare(){
 //检查cli项目版本号
 function check_page_version(){
     loger.info('cli',pkg.version)
-}
-
-//检查node版本，项目中使用的api低版本的node可能是不支持的
-function checke_node_version(){
-    //获取当前node版本号
-    const current_version=process.version;
-    //设置最低版本号
-    const lowest_version=constants.LOWEST_NODE_VERSION
-    // 当前版本号不大于最低版本号，抛异常
-    if(!semver.gte(current_version,lowest_version)){
-        throw new Error(colors.red(`imooc-cli 需要安装v${lowest_version}以上版本的node.js`))
-    }
 }
 
 

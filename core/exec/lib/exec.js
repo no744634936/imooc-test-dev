@@ -2,6 +2,7 @@
 const Package= require('@imooc-cli-dev-zhang/package')
 const loger=require("@imooc-cli-dev-zhang/log")
 const path=require("path")
+const cp =require("child_process")
 
 module.exports = exec;
 
@@ -88,8 +89,68 @@ async function exec() {
     // console.log(await pkg.exists());
     const root_file=pkg.get_root_file_path();
     // console.log("root_file",root_file);
+    // Array.from 将类数组转变为数组
+
     if(root_file){
-        require(root_file)(arguments);
+        try{
+            //  在cli.js 文件中虽然有try catch 
+            // 但是 与promise有关的方法报的错需要在引用的时候单独捕获。在这里无法捕获
+
+
+            // arguments 瘦身,删除一些不必要的属性
+            const args=Array.from(arguments);
+            // 创造一个没有原型链的对象，正真的空对象。
+            const o=Object.create(null);
+            const cmd=args[args.length-1];
+            
+
+            Object.keys(cmd).forEach(key=>{
+                // 继承的原型链上的property就不要了
+                // 以下划线开头的属性也不要了
+                // parent属性也不要了
+                if(cmd.hasOwnProperty(key) && !key.startsWith('_') && key!=='parent'){
+                    o[key]=cmd[key]
+                }
+            })
+            args[args.length-1]=o;
+
+            //JSON.stringify是把js的对象转变为字符串，数据在传输的过程中只能传输字符串。
+            const code=`require('${root_file}')(${JSON.stringify(args)})`;
+            // 使用一个新的进程来执行 code
+            // node -e code，表示让node执行这段代码
+            // process.cwd() 的内容是这个，c:\Users\zhang\Desktop\imooc-test 为什么要用这个cwd呢？
+            // stdio:'inherit',用这个比较方便
+            const child=my_spawn('node',['-e',code],{
+                cwd:process.cwd(),
+                stdio:'inherit'
+            })
+
+            child.on('error',e=>{
+                loger.error(e.message)
+                process.exit(1);  //给一个错误的code，让程序中断执行
+            })
+
+            child.on('exit',e=>{
+                loger.verbose('命令执行成功:'+e)   //这个e的code是0，表示成功
+                process.exit(e);
+            })
+        }catch(e){
+            loger.error(e.message)
+        }
+        
     }
 
+}
+
+
+//windows 跟Linux的平台的兼容
+//linux 里spawn 使用node cp.spawn('node',['-e',code])
+//windows 里spawn 使用node cp.spawn('cmd',['/c','node','-e',code])
+function my_spawn(command,args,options){
+    const win32= process.platform==="win32";
+    const cmd= win32 ? 'cmd' : command;
+    const cmd_args= win32 ? ['/c'].concat(command,args):args;
+
+    // 如果没有options 就使用{}
+    return cp.spawn(cmd,cmd_args,options || {}) 
 }

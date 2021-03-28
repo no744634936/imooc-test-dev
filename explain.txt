@@ -313,6 +313,38 @@ rm -rf .imooc-cli-dev 删除 .imooc-cli-dev 文件夹
 
 
 
+node 多进程
+lerna create @imooc-cli-dev-zhang/command models/
+
+
+commands/init/package.json 导入   
+"dependencies": {
+    "@imooc-cli-dev-zhang/command": "file:../../models/command"
+ }
+
+ cd commands/init
+ npm install
+
+lerna add semver models/command
+lerna add colors models/command
+
+修改 core/exec/lib/exec.js 文件
+修改 models/command/lib/command.js 文件
+修改 commands/init/lib/init.js 文件
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -344,3 +376,97 @@ npm publish
 
 
 写代码的时候一定要用if 判断那个值存不存在，
+
+
+
+
+
+// 微任务，宏任务，事件循环
+先执行同步代码(普通的的代码)、如果遇到setTimeOut这个方法。
+setTimeOut这个方法是先被放入计时区域，等计时结束之后再将任务放入宏任务队列，
+等待同步代码执行完毕，检查微任务队列是否有代码需要执行如果没有，再从宏任务区域将任务放到同步代码区域执行。
+new Promise 是同步代码
+.then 是微任务
+先执行同步代码，然后执行微任务，然后再执行宏任务
+
+
+
+
+
+//vue3 computed  
+
+1，可以将data里面的数据做一些处理后再输出，方便template里的不同地方调用
+2，computed属性的方法与普通方法的区别是，
+   当component里面的template标签同时用了computed 属性方法和普通方法。
+   普通方法要带括号，computed 属性方法不用带括号，
+   ui改变的时候(例如，往input里面输入一个字符，ui就会改变)
+   第一次ui渲染时，computed属性的方法与普通方法都会被调用。
+   之后每输入一个字符，ui重新渲染，普通方法都会被调用一次，
+   而computed 属性方法不被调用，(computed 属性方法返回的值是被缓存起来的)
+3,对一个object进行sort或者filter的时候，使用computed属性。不要再template里sort和filter一个object
+
+
+4，在competition api里面
+计算属性的函数中如果只传入一个回调函数，表示的是get
+   计算属性的函数中如果传入一个对象，表示的是get和set
+
+    const changeOneName = computed(() => {
+      return userName.oneName + "我是get";
+    });
+--------------------------------------------------------------------
+<template>
+  <div class="main">
+    <div>
+      <input type="text" v-model="userName.twoName" />
+    </div>
+    <h1>计算属性</h1>
+    <div>
+      <input type="text" v-model="changeTwoName" />
+    </div>
+  </div>
+</template>
+
+<script>
+import { computed, reactive } from "vue";
+export default {
+  setup() {
+    const userName = reactive({
+      twoName: "李月",
+    });
+
+    // vue3中计算属性的函数中如果传入一个对象，表示的是get和set
+    const changeTwoName = computed({
+      get() {
+        return userName.twoName;
+      },
+      set(val) {
+        console.log(val);
+        let name = val.split("_");
+        userName.twoName = name;
+      },
+    });
+    return {
+      userName,
+      changeTwoName,
+    };
+  },
+};
+</script>
+------------------------------------------------------
+computed 什么时候用？
+1，根据已有的数据组成一个新的数据时，  lastName 接上 firstName 变成fullname
+
+2，对一个object进行sort或者filter的时候，使用computed属性然后再将object显示再template里。不要再template里sort和filter一个object
+
+
+
+watch 什么时候用？
+1， 监视数据当数据达到某个值的时候，触发某个功能，例如监视音量，当音量达到某个值的时候就给提醒。
+2， you have to call an api in response to change，？？？
+3   you have to apply transition   ？？？
+------------------------------------------------------
+
+setup函数里
+const name=ref("zhang");
+调用就要使用name.value 例如console.log(name.value)
+在template里面直接用 name就可以不需要使用，name.value
