@@ -17,11 +17,11 @@
     "test": "echo \"Error: run tests from root\" && exit 1"
   },
   "dependencies": {
+    "@imooc-cli-dev-zhang/exec": "file:../exec",
     "@imooc-cli-dev-zhang/get-npm-info": "file:../../utils/get-npm-info",
+    "@imooc-cli-dev-zhang/init": "file:../../commands/init",
     "@imooc-cli-dev-zhang/log": "file:../../utils/log",
     "@imooc-cli-dev-zhang/utils": "file:../../utils/utils",
-    "@imooc-cli-dev-zhang/init": "file:../../commands/init",
-    "@imooc-cli-dev-zhang/exec": "file:../exec",
     "colors": "^1.4.0",
     "commander": "^7.1.0",
     "dotenv": "^8.2.0",

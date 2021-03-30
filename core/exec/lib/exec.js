@@ -91,6 +91,7 @@ async function exec() {
     // console.log("root_file",root_file);
     // Array.from 将类数组转变为数组
 
+
     if(root_file){
         try{
             //  在cli.js 文件中虽然有try catch 

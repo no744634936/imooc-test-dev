@@ -256,7 +256,7 @@ lerna create format-path utils
 
 // 测试命令
 // imooc-test-dev  init test_projcet_name  --debug
-// imooc-test-dev  init projcet_name -tp /mnt/c/Users/zhang/Desktop/imooc-test/commands/init --debug --force
+// imooc-test-dev  init projcet_name  /mnt/c/Users/zhang/Desktop/imooc/imooc-test/commands/init --debug --force
 // 执行 exec 
 
 // 如果指定了target_path，就使用这个target_path下的本地的init包 (也就是/mnt/c/Users/zhang/Desktop/imooc-test/commands/init这个包)
@@ -334,14 +334,81 @@ lerna add colors models/command
 
 
 
+// 交互式命令的注册
+lerna add inquirer commands/init
+lerna add fs-extra commands/init
+lerna add semver commands/init
+
+修改commands/init/init.js 文件
+
+
+//使用egg.js 创建模板
+mkdir imooc-cli-dev-semver
+cd imooc-cli-dev-semver
+npm init egg --type=simple    //npm init egg 实际上执行的是 npm里的 create-egg这个脚手架
+npm install
+npm run dev
+
+--------------------------------
+windows
+
+C:\Windows\System32\drivers\etc\hosts
+127.0.0.1 zhanghaifeng.com
+就可以使用 http://zhanghaifeng.com:7001/project/template 打开了
+
+----------------------------
+linux
+
+sudo vim /etc/hosts
+127.0.0.1 zhanghaifeng.com
+Esc
+:wq
+就可以使用 http://zhanghaifeng.com:7001/project/template 打开了
+
+----------------------------------
+
+egg.js 链接本地的mongodb数据库
+下载一个库来连接数据库，加快开发，也可以自己封装一个。
+npm i @pick-star/cli-mongodb --save
+
+
+
+//使用vue来创建模板
+
+mkdir imooc-cli-dev-template-vue
+cd imooc-cli-dev-template-vue
+
+mkdir imooc-cli-dev-template-vue3
+cd imooc-cli-dev-template-vue3
+npm init -y
+
+vue create template
+
+cd template
+npm run serve
+添加一个 reset.css 文件
+修改App.vue 文件
+模板只需要最少的文件
+删除node_modules   rm -rf node_modules/  
+删除 git           rm -rf .git 
+删除 pacakge.lock.json
+
+cd imooc-cli-dev-template-vue3
+npm publish
+
+mongodb 里面写上发布的模板信息
+{
+    "name": "vue3标准模板",
+    "npmName": "imooc-cli-dev-template-vue3",
+    "version": "^1.0.0"
+}
 
 
 
 
-
-
-
-
+imooc-test 项目里
+lerna create @imooc-cli-dev-zhang/request utils
+lerna add axios utils/request/
 
 
 
@@ -381,6 +448,19 @@ npm publish
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+知识点
+
 // 微任务，宏任务，事件循环
 先执行同步代码(普通的的代码)、如果遇到setTimeOut这个方法。
 setTimeOut这个方法是先被放入计时区域，等计时结束之后再将任务放入宏任务队列，
@@ -388,6 +468,36 @@ setTimeOut这个方法是先被放入计时区域，等计时结束之后再将�
 new Promise 是同步代码
 .then 是微任务
 先执行同步代码，然后执行微任务，然后再执行宏任务
+
+
+
+
+
+
+// path.join 和 path.resolve 的区别
+
+const path = require('path'); 
+console.log(__dirname); //D:\myProgram\test 
+let myPath = path.join(__dirname,'/img/so'); //D:\myProgram\test\img\so 
+let myPath2 = path.join(__dirname,'./img/so'); //D:\myProgram\test\img\so 
+
+
+// path.resolve()方法可以将多个路径解析为一个规范化的绝对路径. 其处理方式类似于对这些路径逐一进行cd操作
+// path.join只是简单的将该路径片段进行拼接，而path.resolve将以/开始的路径片段作为根目录，在此之前的路径将会被丢弃
+let myPath3 = path.resolve(__dirname,'/img/so'); // D:\img\so
+
+let myPath4 = path.resolve(__dirname,'./img/so'); // D:\myProgram\test\img\so
+
+path.resolve('/a', '/b')      // '/b'
+
+path.resolve('foo/bar', '/tmp/file/', '..', 'a/../subfile')
+相当于
+
+cd foo/bar
+cd /tmp/file/
+cd ..
+cd a/../subfile
+pwd
 
 
 
@@ -470,3 +580,6 @@ setup函数里
 const name=ref("zhang");
 调用就要使用name.value 例如console.log(name.value)
 在template里面直接用 name就可以不需要使用，name.value
+
+
+当报错说找不到包的时候就删除node_modules和package-lock.json 文件 重新 npm install 试试
