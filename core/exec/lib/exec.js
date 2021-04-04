@@ -14,7 +14,7 @@ const SETTINGS={
 
 
 // 测试命令
-// imooc-test-dev  init projcet_name -tp /mnt/c/Users/zhang/Desktop/imooc-test/commands/init --debug --force
+// imooc-test-dev  init projcet_name -tp /mnt/c/Users/zhang/Desktop/imooc/imooc-test/commands/init --debug --force
 async function exec() {
 
     //判断是否为本地的链接
@@ -25,7 +25,7 @@ async function exec() {
     //正式执行的时候不会打印，debug模式的时候才会打印。方便调试
     // -tp 就是 commands/init 的模块路径 C:\Users\zhang\Desktop\imooc-test\commands\init
     // linux 系统下的路径是 /mnt/c/Users/zhang/Desktop/imooc-test/commands/init
-    //测试命令为 imooc-test-dev  init projcet_name -tp /mnt/c/Users/zhang/Desktop/imooc-test/commands/init --debug
+    //测试命令为 imooc-test-dev  init projcet_name -tp /mnt/c/Users/zhang/Desktop/imooc/imooc-test/commands/init --debug
     //这个targetpath 就是commands/init的文件夹路径 用pwd命令 获取
     loger.verbose('target_path',target_path)
     loger.verbose('home_path',home_path)
@@ -90,7 +90,7 @@ async function exec() {
     const root_file=pkg.get_root_file_path();
     // console.log("root_file",root_file);
     // Array.from 将类数组转变为数组
-
+    console.log(root_file);
 
     if(root_file){
         try{

@@ -17,13 +17,17 @@
 
 const Command=require("@imooc-cli-dev-zhang/command")
 const loger=require("@imooc-cli-dev-zhang/log")
-const request=require("@imooc-cli-dev-zhang/request")
+const Package=require("@imooc-cli-dev-zhang/package")
+const {spinner_start,sleep}=require("@imooc-cli-dev-zhang/utils")
+const path=require('path')
+const userHome=require('user-home')
 const semver=require('semver')
 const fs=require('fs')
 const fse=require('fs-extra')
 const inquirer=require('inquirer')
 const TYPE_PROJECT='project';
 const TYPE_COMPONENT='component';
+const get_project_template=require('./get_project_template.js')
 
 class InitCommand extends Command{
     init(){
@@ -31,8 +35,6 @@ class InitCommand extends Command{
         // 这参数是从 Command 继承过来的
         this.projectName=this._args[0] || "";
         this.force= this._args[1].force ? true : false;
-        // console.log(this.projectName);
-        // console.log(this.force);
         loger.verbose("project name",this.projectName)
         loger.verbose("force",this.force)
         
@@ -50,21 +52,29 @@ class InitCommand extends Command{
             if(project_info){
                 //2, 下载模板
                 loger.verbose('project info',project_info)
-                console.log(project_info);
-                this.download_template();
+                this.project_info=project_info;
+                await this.download_template();
                 //3, 安装模板
             }
 
         }catch(e){
+            loger.verbose(e)
             loger.error(e.message)
         }
     }
 
     async prepare(){
+        // 0 ,判断项目模板是否存在
+        const template=await get_project_template();
+        if(!template || template.length===0){
+            throw new Error('项目模板不存在')
+        }
+        loger.verbose('template_info',template)
+        this.template=template;
         //1,判断当前目录是否为空
         // 再 desktop上建一个文件夹，desktop/test
         // 然后cd 到 desktop/test文件夹里去
-        // 执行命令 imooc-test-dev  init projcet_name -tp /mnt/c/Users/zhang/Desktop/imooc-test/commands/init --debug
+        // 执行命令 imooc-test-dev  init projcet_name -tp /mnt/c/Users/zhang/Desktop/imooc/imooc-test/commands/init --debug
         // 这里的process.cwd(); 表示的就是工作目录 desktop/test 文件夹
         // path.resolve('.') 表示的也是desktop/test 文件夹
         // 但是 console.log(__dirname); 就会显示为 /mnt/c/Users/zhang/Desktop/imooc-test/commands/init/lib
@@ -73,10 +83,10 @@ class InitCommand extends Command{
         const local_path=process.cwd();
 
         // 测试命令
-        // imooc-test-dev  init projcet_name -tp /mnt/c/Users/zhang/Desktop/imooc-test/commands/init --debug 
+        // imooc-test-dev  init projcet_name -tp /mnt/c/Users/zhang/Desktop/imooc/imooc-test/commands/init --debug 
         // 如果没有--force 就执行两次确认
 
-        // imooc-test-dev  init projcet_name -tp /mnt/c/Users/zhang/Desktop/imooc-test/commands/init --debug --force
+        // imooc-test-dev  init projcet_name -tp /mnt/c/Users/zhang/Desktop/imooc/imooc-test/commands/init --debug --force
         // 如果有--force 就只执行第两次确认
 
         if(!this.cwd_is_empty(local_path)){
@@ -115,9 +125,6 @@ class InitCommand extends Command{
         //4,获取项目的基本信息
         // return 项目的基本信息
         return this.get_project_info();
-
-
-
     }
     cwd_is_empty(local_path){
         // 读取desktop/test 文件夹里的文件列表，是一个数组
@@ -201,7 +208,15 @@ class InitCommand extends Command{
                         return v;
                     }
                 }
-            }])
+            },
+            {
+                type:'list',
+                name:'project_template',
+                default:'1.0.0',
+                message:'选择项目模板',
+                choices:this.create_template_choice(),
+            }
+        ])
             project_info={
                 type,
                 ...project,
@@ -213,8 +228,62 @@ class InitCommand extends Command{
         return project_info;
     }
 
-    download_template(){
+    create_template_choice(){
+        return this.template.map(item=>{
+            return {name:item.name,value:item.npmName}
+        })
+    }
+
+    async download_template(){
         //1,通过项目模板api获取项目模板信息
+        //project_info 是用户输入的信息，
+        // template是mongodb里的模板信息
+        // console.log('project_info',this.project_info);
+        // console.log('template',this.template);
+
+        console.log('userhome',userHome);
+        const {project_template}=this.project_info
+        const user_select_template_info=this.template.find(item=>item.npmName===project_template)
+    
+        //建立两个文件夹
+        // /home/zhang/.imooc-cli-dev/template
+        // /home/zhang/.imooc-cli-dev/template/node_modules
+        const target_path=path.resolve(userHome,'.imooc-cli-dev','template')
+        const store_dir=path.resolve(userHome,'.imooc-cli-dev','template','node_modules')
+
+        const {npmName,version} = user_select_template_info
+        const template_npm=new Package({target_path,store_dir,package_name:npmName,package_version:version})
+
+        console.log(target_path,store_dir,npmName,version,template_npm);
+
+        //判断/home/zhang/.imooc-cli-dev/template/node_modules里面是否有npmName所指代的包
+        // npmName所指代的是imooc-cli-dev-template-vue3
+        if(!await template_npm.exists()){
+            //下载模板 imooc-cli-dev-template-vue3 到 /home/zhang/.imooc-cli-dev/template/node_modules
+            const spinner= spinner_start('正在下载模板...')
+            await sleep(1000)
+            try{
+                //有时install出了问题spinner就会一直转动，必须让他停止
+                await template_npm.install();
+                loger.success('下载模板成功')
+            }catch(e){
+                throw e
+            }finally{
+                spinner.stop(true)
+            }
+        }else{
+            const spinner= spinner_start('正在更新模板...')
+            await sleep(1000)
+            try{
+                //有时install出了问题spinner就会一直转动，必须让他停止
+                await template_npm.update();
+                loger.success('更新模板成功')
+            }catch(e){
+                throw e
+            }finally{
+                spinner.stop(true)
+            }
+        }
         //1.1 通过egg.js搭建一套后端系统
         //1.2 通过npm储存项目模板
         //1.3 将项目模板信息储存到mongodb数据库中

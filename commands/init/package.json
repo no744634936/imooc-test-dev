@@ -29,9 +29,12 @@
   "dependencies": {
     "@imooc-cli-dev-zhang/command": "file:../../models/command",
     "@imooc-cli-dev-zhang/log": "file:../../utils/log",
+    "@imooc-cli-dev-zhang/package": "file:../../models/package",
     "@imooc-cli-dev-zhang/request": "file:../../utils/request",
+    "@imooc-cli-dev-zhang/utils": "file:../../utils/utils",
     "fs-extra": "^9.1.0",
     "inquirer": "^8.0.0",
-    "semver": "^7.3.5"
+    "semver": "^7.3.5",
+    "user-home": "^2.0.0"
   }
 }

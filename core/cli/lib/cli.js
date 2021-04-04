@@ -149,7 +149,7 @@ function registerCommand(){
         .exitOverride()   //如果像手动处理错误使用这个选项，
 
     //注册命令
-    //  imooc-test-dev  init projcet_name -tp /mnt/c/Users/zhang/Desktop/imooc-test/commands/init --debug --force
+    //  imooc-test-dev  init projcet_name -tp /mnt/c/Users/zhang/Desktop/imooc/imooc-test/commands/init --debug --force
     // 注意exec方法会接收到一些参数，可以用arguments 获得
     program
         .command('init [projcetName]')

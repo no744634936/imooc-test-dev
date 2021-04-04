@@ -30,7 +30,7 @@ class Command{
             let chain = Promise.resolve();
             //因为 checke_node_version() 会抛出异常，所以要对异常做监听
             //const LOWEST_NODE_VERSION="100.0.0";
-            //测试命令 imooc-test-dev  init projcet_name -tp /mnt/c/Users/zhang/Desktop/imooc-test/commands/init --debug --force
+            //测试命令 imooc-test-dev  init projcet_name -tp /mnt/c/Users/zhang/Desktop/imooc/imooc-test/commands/init --debug --force
             chain = chain.then(()=>{this.checke_node_version()})
             chain= chain.then(()=>{this.initArgs()})
             chain= chain.then(()=>{this.init()})

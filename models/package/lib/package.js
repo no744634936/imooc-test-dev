@@ -60,10 +60,10 @@ class Package {
         // 如果package是在 home/zhang/.imooc-cli-dev/dependencies/node_modules 这个目录下
         if(this.storeDir){
             await this.prepare();
-            // console.log(this.cache_file_path);
             //拼出下面这样一个路径，然后去找这样一个路径是否存在，如果存在就更新这个路径里的package
             //home/zhang/.imooc-cli-dev/dependencies/node_modules/_@imooc-cli_init@1.1.2@@imooc-cli/init
             return path_exists(this.cache_file_path)
+
         }else{
             // 输入的 target_path是存在的。
             return path_exists(this.target_path)
@@ -147,8 +147,8 @@ class Package {
             //不使用缓存的情况
             //1,获取package.json文件所在的文件夹，pkg-dir
             // 测试命令 
-            //imooc-test-dev  init projcet_name -tp /mnt/c/Users/zhang/Desktop/imooc-test/commands/init --debug
-            //imooc-test-dev  init projcet_name -tp /mnt/c/Users/zhang/Desktop/imooc-test/commands/init/lib --debug
+            //imooc-test-dev  init projcet_name -tp /mnt/c/Users/zhang/Desktop/imooc/imooc-test/commands/init --debug
+            //imooc-test-dev  init projcet_name -tp /mnt/c/Users/zhang/Desktop/imooc/imooc-test/commands/init/lib --debug
             // Find the root directory of a Node.js project or npm package
              //不管target_path是上面的哪一个返回的都是init文件夹
              return _get_root_file(this.target_path)

@@ -256,7 +256,7 @@ lerna create format-path utils
 
 // 测试命令
 // imooc-test-dev  init test_projcet_name  --debug
-// imooc-test-dev  init projcet_name  /mnt/c/Users/zhang/Desktop/imooc/imooc-test/commands/init --debug --force
+// imooc-test-dev  init projcet_name -tp /mnt/c/Users/zhang/Desktop/imooc/imooc-test/commands/init --debug --force
 // 执行 exec 
 
 // 如果指定了target_path，就使用这个target_path下的本地的init包 (也就是/mnt/c/Users/zhang/Desktop/imooc-test/commands/init这个包)
@@ -377,6 +377,12 @@ npm i @pick-star/cli-mongodb --save
 
 mkdir imooc-cli-dev-template-vue
 cd imooc-cli-dev-template-vue
+建立.gitignore 文件，并写上
+-----
+node_modules
+**/template/node_modules
+
+-----
 
 mkdir imooc-cli-dev-template-vue3
 cd imooc-cli-dev-template-vue3
@@ -404,11 +410,39 @@ mongodb 里面写上发布的模板信息
 }
 
 
+//创建vue中后台
+mkdir imooc-cli-dev-template-vue-element-admin-zhang
+cd imooc-cli-dev-template-vue-element-admin-zhang
+npm init -y
+建立一个tempalte文件夹
+github上面下载vue-element-admin，
+npm install
+npm run dev
+删除node_modules
+删除.gitignore
+删除.github
+然后将文件夹里的内容移动到template文件夹里
+发布 npm publish
+
+将下面的数据放进数据库
+{
+    "_id": {
+        "$oid": "6067d7bf097c9950e404b4ae"
+    },
+    "name": "vue2-element-admin",
+    "npmName": "imooc-cli-dev-template-vue-element-admin-zhang",
+    "version": "^1.0.0"
+}
+
 
 
 imooc-test 项目里
 lerna create @imooc-cli-dev-zhang/request utils
 lerna add axios utils/request/
+lerna add cli-spinner utils/utils/
+
+
+
 
 
 
@@ -447,6 +481,21 @@ npm publish
 
 
 
+
+//debug 的一些心得，
+l，如果说是找不到node_modules 
+lerna clean
+lerna bootstrap
+
+或者cd core/cli
+
+npm unlink
+npm link
+
+2,如果说是找不到./c 
+检查target path -tp 是否出错
+正确的命令
+imooc-test-dev  init projcet_name -tp /mnt/c/Users/zhang/Desktop/imooc/imooc-test/commands/init --debug --force
 
 
 
